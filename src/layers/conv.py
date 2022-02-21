@@ -86,6 +86,8 @@ class Conv(Layer):
 
         return a
 
+
+    #da dim - (batch_size, self.n_h, self.n_w, self.n_c)
     def backward(self, da):
         batch_size = da.shape[0]
         a_prev, z, a = (self.cache[key] for key in ('a_prev', 'z', 'a'))
@@ -95,23 +97,25 @@ class Conv(Layer):
         da_prev_pad = Conv.zero_pad(da_prev, self.pad) if self.pad != 0 else da_prev
 
         dz = da * self.activation.df(z, cached_y=a)
+        # axis 0 bcause every example has impact
         db = 1 / batch_size * dz.sum(axis=(0, 1, 2))
         dw = np.zeros((self.kernel_size, self.kernel_size, self.n_c_prev, self.n_c))
 
-        # 'Convolve' back
+        # 'Convolve' back - n_h output height
         for i in range(self.n_h):
             v_start = self.stride * i
             v_end = v_start + self.kernel_size
-
+                            # output width
             for j in range(self.n_w):
                 h_start = self.stride * j
                 h_end = h_start + self.kernel_size
-
+                                                                # \ is not division simbol - /. It enables calculations to be carried out to the following line.
                 da_prev_pad[:, v_start:v_end, h_start:h_end, :] += \
                     np.sum(self.w[np.newaxis, :, :, :, :] * dz[:, i:i+1, j:j+1, np.newaxis, :], axis=4)
 
                 dw += np.sum(a_prev_pad[:, v_start:v_end, h_start:h_end, :, np.newaxis] *
                              dz[:, i:i+1, j:j+1, np.newaxis, :], axis=0)
+                
 
         dw /= batch_size
 

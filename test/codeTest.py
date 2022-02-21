@@ -17,3 +17,12 @@ np.pad(a, [(1, 1), (0,0)], mode='constant', constant_values=0)
 np.pad(a, [(1, 1), (1,0)], mode='constant', constant_values=0)
 np.pad(a, [(1, 1), (0,1)], mode='constant', constant_values=0)
 np.pad(a, [(1, 1), (1,1)], mode='constant', constant_values=0)
+
+a = np.array([[1,2,4,5,6,7,8,9]])
+i = 2
+a.shape
+a[0,i:i+1]
+
+a = 2
+a *= 5
+a
