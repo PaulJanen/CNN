@@ -47,7 +47,7 @@ if __name__ == "__main__":
     )
 
     cnn.train(x_train, y_train,
-              mini_batch_size=256,
+              mini_batch_size=1024,
               learning_rate=0.001,
-              num_epochs=30,
+              num_epochs=1,
               validation_data=(x_test, y_test))

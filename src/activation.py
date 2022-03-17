@@ -1,3 +1,4 @@
+from matplotlib.pyplot import axis
 import numpy as np
 
 
@@ -40,7 +41,21 @@ class SoftMax(ActivationFunction):
     def df(self, x, cached_y=None):
         raise NotImplementedError
 
+
+class SoftMaxConv(ActivationFunction):
+    # x dims: (batch_size, self.n_h, self.n_w, self.n_c)
+    def f(self, x):
+        y = np.exp(x - np.max(x, axis = 3, keepdims=True))
+        return y / np.sum(y, axis= 3, keepdims=True)
+        #y = np.exp(x - np.max(x, axis=1, keepdims=True))
+        #return y / np.sum(y, axis=1, keepdims=True)
+
+    # y has to be one hot encoded in convolutional fashion and not as a vector
+    def df(self, x, cached_y=None):
+        raise NotImplementedError
+
 identity = Identity()
 sigmoid = Sigmoid()
 relu = ReLU()
 softmax = SoftMax()
+softmaxConv = SoftMaxConv()

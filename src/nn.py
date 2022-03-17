@@ -3,7 +3,8 @@ from functools import reduce
 import numpy as np
 
 from src.optimizer import gradient_descent
-
+from src.layers import fc
+from src.layers import conv
 
 class NeuralNetwork:
     """Neural network model.
@@ -72,7 +73,7 @@ class NeuralNetwork:
         y : numpy.ndarray
             Target labels.
         """
-        da = self.cost_function.grad(a_last, y)
+        da = self.cost_function.optimizedGrad(a_last, y)
         batch_size = da.shape[0]
 
         for layer in reversed(self.layers):
@@ -103,6 +104,11 @@ class NeuralNetwork:
         """
         a_last = self.forward_prop(x, training=False)
         return a_last
+
+    def slidingWindowsDimensionsUpdate(self, input_dim):
+        self.layers[0].init(input_dim, initializeWeights = False)
+        for prev_layer, curr_layer in zip(self.layers, self.layers[1:]):
+            curr_layer.init(prev_layer.get_output_dim(), initializeWeights = False)
 
     def update_param(self, learning_rate, step):
         """
@@ -165,7 +171,7 @@ class NeuralNetwork:
             epoch_cost = 0
 
             if mini_batch_size == x_train.shape[0]:
-                mini_batches = (x_train, y_train)
+                mini_batches = [(x_train, y_train)]
             else:
                 mini_batches = NeuralNetwork.create_mini_batches(x_train, y_train, mini_batch_size)
 
@@ -179,7 +185,11 @@ class NeuralNetwork:
             print(f"\nCost after epoch {e+1}: {epoch_cost}")
 
             print("Computing accuracy on validation set...")
-            accuracy = np.sum(np.argmax(self.predict(x_val), axis=1) == y_val) / x_val.shape[0]
+            accuracy = 0
+            if(type(self.layers[-1]) is fc.FullyConnected):
+                accuracy = np.sum(np.argmax(self.predict(x_val), axis=1) == y_val) / x_val.shape[0]
+            if(type(self.layers[-1]) is conv.Conv):
+                accuracy = np.sum(np.argmax(self.predict(x_val), axis=3).flatten() == y_val) / x_val.shape[0]
             print(f"Accuracy on validation set: {accuracy}")
 
         print("Finished training")

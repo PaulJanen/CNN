@@ -52,9 +52,9 @@ class FullyConnected(Layer):
         if self.is_softmax:
             # Get back y from the gradient wrt the cost of this layer's activations
             # That is get back y from - y/a = da
-            y = da * (-a)
-
-            dz = a - y
+            #y = da * (-a)
+            #dz = a - y
+            dz = da
         else:
             dz = da * self.activation.df(z, cached_y=a)
 

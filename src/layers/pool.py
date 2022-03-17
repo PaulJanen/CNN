@@ -45,7 +45,7 @@ class Pool(Layer):
         self.cache = {}
 
     #in_dim is an array - prev_layer.get_output_dim()
-    def init(self, in_dim):
+    def init(self, in_dim, initializeWeights=True):
         self.n_h_prev, self.n_w_prev, self.n_c_prev = in_dim
         self.n_h = int((self.n_h_prev - self.pool_size) / self.stride + 1)
         self.n_w = int((self.n_w_prev - self.pool_size) / self.stride + 1)
@@ -54,7 +54,7 @@ class Pool(Layer):
     def forward(self, a_prev, training):
         batch_size = a_prev.shape[0]
         a = np.zeros((batch_size, self.n_h, self.n_w, self.n_c))
-
+        print("pool shape" + str(a.shape))
         # Pool
         for i in range(self.n_h):
             v_start = i * self.stride

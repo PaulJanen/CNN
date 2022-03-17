@@ -1,3 +1,4 @@
+from matplotlib.pyplot import axis
 import numpy as np
 
 epsilon = 1e-20
@@ -49,5 +50,30 @@ class SoftmaxCrossEntropy(CostFunction):
         a_last = np.clip(a_last, epsilon, 1.0)
         return -(y-a_last)
 
+class SoftmaxConvCrossEntropy(CostFunction):
+    # one hot encoded y has to have the same dim as a_last: (batch_size, self.n_h, self.n_w, self.n_c)
+    def f(self, a_last, y):
+        batch_size = y.shape[0]
+        a_last = np.clip(a_last, epsilon, 1.0)
+        
+        # returns cost for each cell
+        #cost = -1 / batch_size * np.sum((y * np.log(a_last)), axis= (3,0), keepdims=True)
+
+        #returns every cells cost summed up
+        cost = -1 / batch_size * np.sum((y * np.log(a_last)))
+        return cost
+    
+    # Only cross entropy derivative
+    def grad(self, a_last, y):
+        a_last = np.clip(a_last, epsilon, 1.0)
+        return - np.divide(y, a_last)
+    
+    # Cross entropy derivative * softmax derivative
+    def optimizedGrad(self, a_last, y):
+        a_last = np.clip(a_last, epsilon, 1.0)
+        # one hot conv encoded y 
+        return -(y-a_last)
+
+softmax_conv_cross_entropy = SoftmaxConvCrossEntropy()
 softmax_cross_entropy = SoftmaxCrossEntropy()
 sigmoid_cross_entropy = SigmoidCrossEntropy()

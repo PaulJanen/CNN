@@ -1,6 +1,6 @@
 class Layer:
 
-    def init(self, in_dim):
+    def init(self, in_dim, initializeWeights=True):
         """
         Initializes the layer.
         Parameters

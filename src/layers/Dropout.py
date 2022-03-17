@@ -21,7 +21,7 @@ class Dropout(Layer):
         self.mask_dim = None
         self.cached_mask = None
 
-    def init(self, in_dim):
+    def init(self, in_dim, initializeWeights=True):
         self.mask_dim = in_dim
 
     def forward(self, a_prev, training):

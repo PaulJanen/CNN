@@ -2,7 +2,7 @@ import numpy as np
 
 from src.activation import identity
 from src.layers.layer import Layer
-
+from src.activation import SoftMaxConv
 
 class Conv(Layer):
     """2D convolutional layer.
@@ -48,17 +48,19 @@ class Conv(Layer):
         self.w = None
         self.b = None
         self.activation = activation
+        self.is_softmax = isinstance(self.activation, SoftMaxConv)
         self.cache = {}
 
-    def init(self, in_dim):
+    def init(self, in_dim, initializeWeights = True):
         self.pad = 0 if self.padding == 'valid' else int((self.kernel_size - 1) / 2)
 
         self.n_h_prev, self.n_w_prev, self.n_c_prev = in_dim
         self.n_h = int((self.n_h_prev - self.kernel_size + 2 * self.pad) / self.stride + 1)
         self.n_w = int((self.n_w_prev - self.kernel_size + 2 * self.pad) / self.stride + 1)
 
-        self.w = np.random.randn(self.kernel_size, self.kernel_size, self.n_c_prev, self.n_c)
-        self.b = np.zeros((1, 1, 1, self.n_c))
+        if(initializeWeights):
+            self.w = np.random.randn(self.kernel_size, self.kernel_size, self.n_c_prev, self.n_c)*0.1
+            self.b = np.zeros((1, 1, 1, self.n_c))
 
     def forward(self, a_prev, training):
         batch_size = a_prev.shape[0]
@@ -79,7 +81,7 @@ class Conv(Layer):
 
         z = out + self.b
         a = self.activation.f(z)
-
+        print("conv shape" + str(z.shape))
         if training:
             # Cache for backward pass
             self.cache.update({'a_prev': a_prev, 'z': z, 'a': a})
@@ -96,7 +98,12 @@ class Conv(Layer):
         da_prev = np.zeros((batch_size, self.n_h_prev, self.n_w_prev, self.n_c_prev))
         da_prev_pad = Conv.zero_pad(da_prev, self.pad) if self.pad != 0 else da_prev
 
-        dz = da * self.activation.df(z, cached_y=a)
+
+        if self.is_softmax:
+            dz = da
+        else:
+           dz = da * self.activation.df(z, cached_y=a)
+
         # axis 0 bcause every example has impact
         db = 1 / batch_size * dz.sum(axis=(0, 1, 2))
         dw = np.zeros((self.kernel_size, self.kernel_size, self.n_c_prev, self.n_c))
