@@ -97,20 +97,19 @@ def newWays():
             Conv(1, 1, y_train.shape[0], activation=softmaxConv),
         ],
         cost_function=softmax_conv_cross_entropy,
-        optimizer=adam
+        optimizer=adam,
+        saveWeights=False,
+        loadWeights=True
     )
-    
-    cnn.train(x_train, y_train,
-              mini_batch_size=x_train.shape[0],
-              learning_rate=0.001,
-              num_epochs=20,
-              validation_data=(x_test, y_test))
+
+    #cnn.train(x_train, y_train,
+    #          mini_batch_size=x_train.shape[0],
+    #          learning_rate=0.001,
+    #          num_epochs=20,
+    #          validation_data=(x_test, y_test))
     
     input_dim=(28,x_train.shape[0] * 28,1)
-    print(input_dim)
     cnn.slidingWindowsDimensionsUpdate(input_dim)
-    #print(predictXTrain.shape)
-    print("starting prediction")
     predictions = cnn.predict(x_predict.astype(np.float32))
     print(np.argmax(predictions, axis=3))
 if __name__ == "__main__":

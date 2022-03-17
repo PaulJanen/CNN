@@ -20,6 +20,8 @@ class Dropout(Layer):
         self.keep_prob = keep_prob
         self.mask_dim = None
         self.cached_mask = None
+        self.w = None
+        self.b = None
 
     def init(self, in_dim, initializeWeights=True):
         self.mask_dim = in_dim

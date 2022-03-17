@@ -1,3 +1,4 @@
+from fileinput import filename
 from functools import reduce
 
 import numpy as np
@@ -24,21 +25,33 @@ class NeuralNetwork:
         L2 regularization parameter.
     trainable_layers: list
         Trainable layers(those that have trainable parameters) used in the model.
+    saveWeights: bool
+        Save trainable layers weights to .npy file
+    loadWeights: bool
+        Load trainable layers weights from .npy file
     """
 
-    def __init__(self, input_dim, layers, cost_function, optimizer=gradient_descent, l2_lambda=0):
+    def __init__(self, input_dim, layers, cost_function, optimizer=gradient_descent, l2_lambda=0, saveWeights = False
+                        ,loadWeights = False):
         self.layers = layers
         self.w_grads = {}
         self.b_grads = {}
         self.cost_function = cost_function
         self.optimizer = optimizer
         self.l2_lambda = l2_lambda
+        self.saveWeights = saveWeights
+        self.loadWeights = loadWeights
 
         # Initialize the layers in the model providing the input dimension they should expect
-        self.layers[0].init(input_dim)
-        for prev_layer, curr_layer in zip(self.layers, self.layers[1:]):
-            curr_layer.init(prev_layer.get_output_dim())
+        self.layers[0].init(input_dim, not loadWeights)
+        if(loadWeights): self.layers[0].load_params(self.getFileName(0))    
+        for i,layers in enumerate(zip(self.layers, self.layers[1:])):
+            prev_layer, curr_layer = layers
+            curr_layer.init(prev_layer.get_output_dim(), not loadWeights)
+            if(loadWeights):
+                curr_layer.load_params(self.getFileName(i+1))
 
+        
         self.trainable_layers = set(layer for layer in self.layers if layer.get_params() is not None)
         self.optimizer = optimizer(self.trainable_layers)
         self.optimizer.initialize()
@@ -60,7 +73,6 @@ class NeuralNetwork:
         a = x
         for layer in self.layers:
             a = layer.forward(a, training)
-
         return a
 
     def backward_prop(self, a_last, y):
@@ -192,6 +204,9 @@ class NeuralNetwork:
                 accuracy = np.sum(np.argmax(self.predict(x_val), axis=3).flatten() == y_val) / x_val.shape[0]
             print(f"Accuracy on validation set: {accuracy}")
 
+        if (self.saveWeights):
+            self.saveAllWeights()
+
         print("Finished training")
 
     def train_step(self, x_train, y_train, learning_rate, step):
@@ -217,6 +232,29 @@ class NeuralNetwork:
         cost = self.compute_cost(a_last, y_train)
         self.update_param(learning_rate, step)
         return cost
+
+    def saveAllWeights(self):
+        """
+        Saves all layers weights to .npy file.
+        """
+        for i,layer in enumerate(self.layers):
+            filename = self.getFileName(i)
+            layer.save_params(filename, layer.w, layer.b)
+
+    def getFileName(self, layerIndex):
+        """
+        Return layers name
+        Parameters
+        ----------
+        layerIndex : int
+            Unique layers index in layers array.
+        Returns
+        -------
+        str
+            Layers name. Example: Input layer will return Layer0 name.
+        """
+        return ("Layer" + str(layerIndex))
+
 
     @staticmethod
     def create_mini_batches(x, y, mini_batch_size):

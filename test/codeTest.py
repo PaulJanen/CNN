@@ -31,6 +31,11 @@ a *= 5
 a
 int(4.75)
 import numpy as np
+
+l = ['Alice', 'Bob', 'Charlie']
+for i,name in enumerate(l):
+    print(name)
+
 np.arange(5)
 a_prev = np.array([ [[1,2,3],[4,5,6]],      [[5,5,5],[6,6,6]] ])
 a_prev.shape

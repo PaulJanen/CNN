@@ -45,8 +45,8 @@ class Conv(Layer):
         self.pad = None
         self.n_h, self.n_w, self.n_c = None, None, n_c
         self.n_h_prev, self.n_w_prev, self.n_c_prev = None, None, None
-        self.w = None
-        self.b = None
+        #self.w = None
+        #self.b = None
         self.activation = activation
         self.is_softmax = isinstance(self.activation, SoftMaxConv)
         self.cache = {}
@@ -61,6 +61,8 @@ class Conv(Layer):
         if(initializeWeights):
             self.w = np.random.randn(self.kernel_size, self.kernel_size, self.n_c_prev, self.n_c)*0.1
             self.b = np.zeros((1, 1, 1, self.n_c))
+
+
 
     def forward(self, a_prev, training):
         batch_size = a_prev.shape[0]
@@ -140,6 +142,8 @@ class Conv(Layer):
 
     def get_params(self):
         return self.w, self.b
+
+
 
     #https://stackoverflow.com/questions/35751306/python-how-to-pad-numpy-array-with-zeros
     #Examples are in codeTest
